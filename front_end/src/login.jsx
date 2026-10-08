@@ -1,24 +1,28 @@
 import { useState } from "react";
+import "./App.css";
 
-function Login() {
+function Login({ setLoggedIn }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     const handleLogin = async () => {
-        const response = await fetch("https://note-taking-app-kz5a.onrender.com/api/login/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password,
-            }),
-        });
+        const response = await fetch(
+            "https://note-taking-app-kz5a.onrender.com/api/login/",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            }
+        );
 
         const data = await response.json();
-
-        console.log(data);
+        localStorage.setItem("access", data.access);
+        setLoggedIn(true);
     };
 
     return (
