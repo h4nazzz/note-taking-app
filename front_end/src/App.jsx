@@ -1,4 +1,5 @@
-import { useState,useEffect} from "react";
+import { useState, useEffect } from "react";
+import "./App.css";
 
 function App() {
   const [title, setTitle] = useState("");
@@ -7,115 +8,138 @@ function App() {
 
   const [notes, setNotes] = useState([]);
 
-useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/notes/")
-        .then(response => response.json())
-        .then(data => {
-            setNotes(data);
-        });
-}, []);
+  useEffect(() => {
+    fetch("https://note-taking-app-kz5a.onrender.com/api/notes/")
+      .then((response) => response.json())
+      .then((data) => {
+        setNotes(data);
+      });
+  }, []);
 
-async function deleteNote(id) {
-   await fetch(`http://127.0.0.1:8000/api/notes/${id}/`, {
+  async function deleteNote(id) {
+    await fetch(
+      `https://note-taking-app-kz5a.onrender.com/api/notes/${id}/`,
+      {
         method: "DELETE",
-    })
-        .then(response => {
-            if (response.ok) {
-                setNotes(notes.filter(note => note.id !== id));
-            }
-        });
-}
+      }
+    ).then((response) => {
+      if (response.ok) {
+        setNotes(notes.filter((note) => note.id !== id));
+      }
+    });
+  }
+
   async function addNote() {
-  const newNote = {
-    title: title,
-    content: content,
-  };
+    const newNote = {
+      title: title,
+      content: content,
+    };
 
-  const response = await fetch("http://127.0.0.1:8000/api/notes/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newNote),
-  });
+    const response = await fetch(
+      "https://note-taking-app-kz5a.onrender.com/api/notes/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newNote),
+      }
+    );
 
-  const savedNote = await response.json();
+    const savedNote = await response.json();
 
-  setNotes([...notes, savedNote]);
+    setNotes([...notes, savedNote]);
 
-  setTitle("");
-  setContent("");
-}
+    setTitle("");
+    setContent("");
+  }
 
-function editNote(id) {
-setEditingId(id);
-}
+  function editNote(id) {
+    setEditingId(id);
+  }
 
-async function updateNote(note) {
-  const response = await fetch(
-    `http://127.0.0.1:8000/api/notes/${note.id}/`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(note),
-    }
-  );
-  setEditingId(null);
-}
+  async function updateNote(note) {
+    await fetch(
+      `https://note-taking-app-kz5a.onrender.com/api/notes/${note.id}/`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(note),
+      }
+    );
+
+    setEditingId(null);
+  }
 
   return (
-    <div>
+    <div className="app">
       <h1>My Notes</h1>
 
-      <div>
+      <div className="container">
+
         {/* Notes section */}
-        <section>
+        <section className="notes-section">
           <h2>Your Notes</h2>
 
           {notes.map((note, index) => (
-            <div key={index}>
+            <div className="note" key={index}>
+
               {editingId === note.id ? (
-  <input
-  value={note.title}
-  onChange={(e) => {
-    setNotes(
-      notes.map((n) =>
-        n.id === note.id
-          ? { ...n, title: e.target.value }
-          : n
-      )
-    );
-  }}
-/>
-) : (
-  <h3>{note.title}</h3>
-)}
-              {editingId === note.id ? (<div><button onClick={() => updateNote(note)}>Save</button>
-  <textarea
-  value={note.content}
-  onChange={(e) => {
-    setNotes(
-      notes.map((n) =>
-        n.id === note.id
-          ? { ...n, content: e.target.value }
-          : n
-      )
-    );
-  }}
-/></div>
-) : (
-  <p>{note.content}</p>
-)}
-              <button onClick={() => editNote(note.id)}>Edit</button>
-              <button onClick={() => deleteNote(note.id)}>Delete</button>
+                <input
+                  value={note.title}
+                  onChange={(e) => {
+                    setNotes(
+                      notes.map((n) =>
+                        n.id === note.id
+                          ? { ...n, title: e.target.value }
+                          : n
+                      )
+                    );
+                  }}
+                />
+              ) : (
+                <h3>{note.title}</h3>
+              )}
+
+              {editingId === note.id ? (
+                <div>
+                  <textarea
+                    value={note.content}
+                    onChange={(e) => {
+                      setNotes(
+                        notes.map((n) =>
+                          n.id === note.id
+                            ? { ...n, content: e.target.value }
+                            : n
+                        )
+                      );
+                    }}
+                  />
+
+                  <button onClick={() => updateNote(note)}>
+                    Save
+                  </button>
+                </div>
+              ) : (
+                <p>{note.content}</p>
+              )}
+
+              <button onClick={() => editNote(note.id)}>
+                Edit
+              </button>
+
+              <button onClick={() => deleteNote(note.id)}>
+                Delete
+              </button>
+
             </div>
           ))}
         </section>
 
         {/* Add note section */}
-        <section>
+        <section className="add-section">
           <h2>Add New Note</h2>
 
           <input
@@ -124,18 +148,17 @@ async function updateNote(note) {
             onChange={(e) => setTitle(e.target.value)}
           />
 
-          <br />
-
           <textarea
             placeholder="Write your note..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
 
-          <br />
-
-          <button onClick={addNote}>Add Note</button>
+          <button onClick={addNote}>
+            Add Note
+          </button>
         </section>
+
       </div>
     </div>
   );
