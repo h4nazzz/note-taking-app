@@ -133,4 +133,5 @@ MAILERS = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://note-taking-ieqee11yu-h4nazzzs-projects.vercel.app/"
 ]
