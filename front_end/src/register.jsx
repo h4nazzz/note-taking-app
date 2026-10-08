@@ -1,13 +1,13 @@
 
 import { useState } from "react";
 
-function Login({ setLoggedIn, setShowRegister }) {
+function Register({ setShowRegister }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = async () => {
+    const handleRegister = async () => {
         const response = await fetch(
-            "https://note-taking-app-kz5a.onrender.com/api/login/",
+            "https://note-taking-app-kz5a.onrender.com/api/register/",
             {
                 method: "POST",
                 headers: {
@@ -23,18 +23,16 @@ function Login({ setLoggedIn, setShowRegister }) {
         const data = await response.json();
 
         if (response.ok) {
-            localStorage.setItem("access", data.access);
-            localStorage.setItem("refresh", data.refresh);
-
-            setLoggedIn(true);
+            alert("Registration successful! You can now login.");
+            setShowRegister(false);
         } else {
-            alert("Invalid username or password");
+            alert(JSON.stringify(data));
         }
     };
 
     return (
         <div>
-            <h1>Login</h1>
+            <h1>Register</h1>
 
             <input
                 placeholder="Username"
@@ -49,17 +47,17 @@ function Login({ setLoggedIn, setShowRegister }) {
                 onChange={(e) => setPassword(e.target.value)}
             />
 
-            <button onClick={handleLogin}>Login</button>
+            <button onClick={handleRegister}>Register</button>
 
             <p>
-                Don't have an account?
-                <button onClick={() => setShowRegister(true)}>
-                    Register
+                Already have an account?
+                <button onClick={() => setShowRegister(false)}>
+                    Login
                 </button>
             </p>
         </div>
     );
 }
 
-export default Login;
+export default Register;
 
