@@ -4,7 +4,9 @@ import Register from "./register";
 import Notes from "./notes";
 
 function App() {
-    const [loggedIn, setLoggedIn] = useState(false);
+    const [loggedIn, setLoggedIn] = useState(
+        () => Boolean(localStorage.getItem("access"))
+    );
     const [showRegister, setShowRegister] = useState(false);
 
     if (loggedIn) {
@@ -24,4 +26,3 @@ function App() {
 }
 
 export default App;
-
