@@ -5,51 +5,82 @@ function App() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [editingId, setEditingId] = useState(null);
-
   const [notes, setNotes] = useState([]);
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem("access");
+
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  };
+
   useEffect(() => {
-    fetch("https://note-taking-app-kz5a.onrender.com/api/notes/")
-      .then((response) => response.json())
+    const token = localStorage.getItem("access");
+
+    if (!token) {
+      setNotes([]);
+      return;
+    }
+
+    fetch("https://note-taking-app-kz5a.onrender.com/api/notes/", {
+      headers: getAuthHeaders(),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch notes");
+        }
+        return response.json();
+      })
       .then((data) => {
         setNotes(data);
+      })
+      .catch(() => {
+        setNotes([]);
       });
   }, []);
 
   async function deleteNote(id) {
-    await fetch(
+    const response = await fetch(
       `https://note-taking-app-kz5a.onrender.com/api/notes/${id}/`,
       {
         method: "DELETE",
+        headers: getAuthHeaders(),
       }
-    ).then((response) => {
-      if (response.ok) {
-        setNotes(notes.filter((note) => note.id !== id));
-      }
-    });
+    );
+
+    if (response.ok) {
+      setNotes((currentNotes) => currentNotes.filter((note) => note.id !== id));
+    }
   }
 
   async function addNote() {
+    if (!title.trim() || !content.trim()) {
+      return;
+    }
+
     const newNote = {
-      title: title,
-      content: content,
+      title,
+      content,
     };
 
     const response = await fetch(
       "https://note-taking-app-kz5a.onrender.com/api/notes/",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(newNote),
       }
     );
 
+    if (!response.ok) {
+      return;
+    }
+
     const savedNote = await response.json();
 
-    setNotes([...notes, savedNote]);
-
+    setNotes((currentNotes) => [...currentNotes, savedNote]);
     setTitle("");
     setContent("");
   }
@@ -59,18 +90,18 @@ function App() {
   }
 
   async function updateNote(note) {
-    await fetch(
+    const response = await fetch(
       `https://note-taking-app-kz5a.onrender.com/api/notes/${note.id}/`,
       {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(note),
       }
     );
 
-    setEditingId(null);
+    if (response.ok) {
+      setEditingId(null);
+    }
   }
 
   return (
@@ -78,23 +109,18 @@ function App() {
       <h1>My Notes</h1>
 
       <div className="container">
-
-        {/* Notes section */}
         <section className="notes-section">
           <h2>Your Notes</h2>
 
           {notes.map((note, index) => (
-            <div className="note" key={index}>
-
+            <div className="note" key={note.id ?? index}>
               {editingId === note.id ? (
                 <input
                   value={note.title}
                   onChange={(e) => {
-                    setNotes(
-                      notes.map((n) =>
-                        n.id === note.id
-                          ? { ...n, title: e.target.value }
-                          : n
+                    setNotes((currentNotes) =>
+                      currentNotes.map((n) =>
+                        n.id === note.id ? { ...n, title: e.target.value } : n
                       )
                     );
                   }}
@@ -108,37 +134,26 @@ function App() {
                   <textarea
                     value={note.content}
                     onChange={(e) => {
-                      setNotes(
-                        notes.map((n) =>
-                          n.id === note.id
-                            ? { ...n, content: e.target.value }
-                            : n
+                      setNotes((currentNotes) =>
+                        currentNotes.map((n) =>
+                          n.id === note.id ? { ...n, content: e.target.value } : n
                         )
                       );
                     }}
                   />
 
-                  <button onClick={() => updateNote(note)}>
-                    Save
-                  </button>
+                  <button onClick={() => updateNote(note)}>Save</button>
                 </div>
               ) : (
                 <p>{note.content}</p>
               )}
 
-              <button onClick={() => editNote(note.id)}>
-                Edit
-              </button>
-
-              <button onClick={() => deleteNote(note.id)}>
-                Delete
-              </button>
-
+              <button onClick={() => editNote(note.id)}>Edit</button>
+              <button onClick={() => deleteNote(note.id)}>Delete</button>
             </div>
           ))}
         </section>
 
-        {/* Add note section */}
         <section className="add-section">
           <h2>Add New Note</h2>
 
@@ -154,11 +169,8 @@ function App() {
             onChange={(e) => setContent(e.target.value)}
           />
 
-          <button onClick={addNote}>
-            Add Note
-          </button>
+          <button onClick={addNote}>Add Note</button>
         </section>
-
       </div>
     </div>
   );

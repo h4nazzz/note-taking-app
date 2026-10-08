@@ -1,11 +1,15 @@
 
 import { useState } from "react";
+import "./App.css";
 
 function Login({ setLoggedIn, setShowRegister }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
     const handleLogin = async () => {
+        setError("");
+
         const response = await fetch(
             "https://note-taking-app-kz5a.onrender.com/api/login/",
             {
@@ -20,43 +24,47 @@ function Login({ setLoggedIn, setShowRegister }) {
             }
         );
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (response.ok) {
             localStorage.setItem("access", data.access);
             localStorage.setItem("refresh", data.refresh);
-
             setLoggedIn(true);
-        } else {
-            alert("Invalid username or password");
+            return;
         }
+
+        setError(data.detail || "Invalid username or password");
     };
 
     return (
-        <div>
-            <h1>Login</h1>
+        <div className="auth-page">
+            <div className="auth-card">
+                <h1>Welcome back</h1>
 
-            <input
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-            />
+                {error && <div className="auth-error">{error}</div>}
 
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
+                <div className="auth-form">
+                    <input
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
 
-            <button onClick={handleLogin}>Login</button>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
 
-            <p>
-                Don't have an account?
-                <button onClick={() => setShowRegister(true)}>
-                    Register
-                </button>
-            </p>
+                    <button className="auth-button" onClick={handleLogin}>Login</button>
+                </div>
+
+                <p className="auth-toggle">
+                    Don't have an account?
+                    <button onClick={() => setShowRegister(true)}>Register</button>
+                </p>
+            </div>
         </div>
     );
 }

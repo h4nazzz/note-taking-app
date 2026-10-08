@@ -1,11 +1,15 @@
 
 import { useState } from "react";
+import "./App.css";
 
 function Register({ setShowRegister }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
 
     const handleRegister = async () => {
+        setMessage("");
+
         const response = await fetch(
             "https://note-taking-app-kz5a.onrender.com/api/register/",
             {
@@ -20,41 +24,46 @@ function Register({ setShowRegister }) {
             }
         );
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (response.ok) {
-            alert("Registration successful! You can now login.");
-            setShowRegister(false);
-        } else {
-            alert(JSON.stringify(data));
+            setMessage("Registration successful! You can now login.");
+            setTimeout(() => setShowRegister(false), 1200);
+            return;
         }
+
+        setMessage(data?.detail || JSON.stringify(data) || "Registration failed");
     };
 
     return (
-        <div>
-            <h1>Register</h1>
+        <div className="auth-page">
+            <div className="auth-card">
+                <h1>Create account</h1>
 
-            <input
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-            />
+                {message && <div className="auth-error">{message}</div>}
 
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
+                <div className="auth-form">
+                    <input
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
 
-            <button onClick={handleRegister}>Register</button>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
 
-            <p>
-                Already have an account?
-                <button onClick={() => setShowRegister(false)}>
-                    Login
-                </button>
-            </p>
+                    <button className="auth-button" onClick={handleRegister}>Register</button>
+                </div>
+
+                <p className="auth-toggle">
+                    Already have an account?
+                    <button onClick={() => setShowRegister(false)}>Login</button>
+                </p>
+            </div>
         </div>
     );
 }
