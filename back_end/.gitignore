@@ -1,0 +1,14 @@
+# Python
+back_end/venv/
+__pycache__/
+*.pyc
+
+# Django
+back_end/db.sqlite3
+
+# React
+front_end/node_modules/
+front_end/dist/
+
+# Environment variables
+.env
